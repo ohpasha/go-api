@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"storageModule/shape"
 	"storageModule/storage"
 )
 
@@ -49,7 +50,20 @@ func checkType(value interface{}) {
 	}
 }
 
+func printSquare(shape shape.Shape) {
+	square, _ := shape.GetSquare()
+	fmt.Println(square)
+}
+
 func main() {
+	var square, triangle shape.Shape
+
+	square = shape.NewSquare(10)
+	triangle = shape.NewTriangle(10, 10, 30)
+	printSquare(square)
+	printSquare(triangle)
+	square = triangle
+
 	checkType("str")
 	var s storage.Storage
 	fmt.Printf("type s %T\n", s)
