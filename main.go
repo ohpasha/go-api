@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"storageModule/goroutine"
 	"storageModule/shape"
 	"storageModule/storage"
+	"time"
 )
 
 func calcCircleArea(r int) (float64, error) {
@@ -55,7 +57,49 @@ func printSquare(shape shape.Shape) {
 	fmt.Println(square)
 }
 
+func generateNumbers(n int, res chan int) {
+	for i := 0; i < n; i++ {
+		res <- i
+	}
+}
+
 func main() {
+	deadLock := make(chan int)
+
+	go func() {
+		deadLock <- 42
+	}()
+
+	time.Sleep(time.Microsecond * 1000)
+	select {
+	case n := <-deadLock:
+		fmt.Println(n)
+	default:
+		fmt.Println("nothing")
+	}
+
+	t := time.Now()
+
+	result1 := make(chan int)
+	result2 := make(chan int)
+
+	go func() {
+		for {
+			for _, r := range `-\|/` {
+				fmt.Printf("\r%c", r)
+				time.Sleep(time.Microsecond * 1000)
+			}
+		}
+	}()
+	go goroutine.CalcSomething(9000, result1)
+	go goroutine.CalcSomething(4000, result2)
+	fmt.Printf("result1: %d\n", <-result1)
+	fmt.Printf("result2: %d\n", <-result2)
+	time.Sleep(time.Second * 1)
+
+	fmt.Printf("whole time: %s\n", time.Since(t))
+	fmt.Println("--------")
+
 	var square, triangle shape.Shape
 
 	square = shape.NewSquare(10)
