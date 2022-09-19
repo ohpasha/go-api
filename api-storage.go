@@ -1,21 +1,22 @@
 package main
 
 import (
+	"errors"
 	"sync"
 )
 
 type Employee struct {
-	ID     int    `json:id`
-	Name   string `json:name`
-	Sex    string `json:sex`
-	Age    int    `json:age`
-	Salary int    `json:age`
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Sex    string `json:"sex"`
+	Age    int    `json:"1"`
+	Salary int    `json:"salary"`
 }
 
 type Storage interface {
 	Insert(e *Employee)
 	Get(id int) (Employee, error)
-	Update(id int, e *Employee)
+	Update(id int, e Employee)
 	Delete(id int)
 }
 
@@ -40,24 +41,26 @@ func (s *MemoryStorage) Insert(e *Employee) {
 	s.Unlock()
 }
 
-func (s *MemoryStorage) Update(id int, e *Employee) {
+func (s *MemoryStorage) Update(id int, e Employee) {
 	s.Lock()
-	e.ID = s.counter
-	s.data[s.counter] = *e
-
+	s.data[id] = e
 	s.Unlock()
 }
 
 func (s *MemoryStorage) Delete(id int) {
-	return
+	s.Lock()
+	delete(s.data, id)
+	s.Unlock()
 }
 
 func (s *MemoryStorage) Get(id int) (Employee, error) {
-	return Employee{
-		ID:     1,
-		Name:   "s12",
-		Sex:    "1212",
-		Age:    12,
-		Salary: 12,
-	}, nil
+	s.Lock()
+	employee, isExist := s.data[id]
+	s.Unlock()
+
+	if !isExist {
+		return Employee{}, errors.New("employee not found")
+	}
+
+	return employee, nil
 }
